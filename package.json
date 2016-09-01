@@ -1,0 +1,19 @@
+{
+  "name": "machine-learning-and-deep-learning",
+  "version": "1.0.0",
+  "description": "Sample codes to study machine learning and deep learning",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saitoxu/machine-learning-and-deep-learning.git"
+  },
+  "author": "Yosuke Saito",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/saitoxu/machine-learning-and-deep-learning/issues"
+  },
+  "homepage": "https://github.com/saitoxu/machine-learning-and-deep-learning#readme"
+}
