@@ -1,5 +1,7 @@
 'use strict';
 
+let random = require('../lib/random.js');
+
 const GEN_MAX = 1000;
 const NODE_NO = 15;
 const ALPHA = 0.1;
@@ -11,7 +13,7 @@ let i, s, t, qValues = [];
 
 // initialize Q values
 for (i = 0; i < NODE_NO; i++) {
-    qValues.push(getRandom(0, 100, true));
+    qValues.push(random.get(0, 100, true));
 }
 console.log(qValues);
 
@@ -29,8 +31,8 @@ function selectAction(old, qValues) {
     let s = 2 * old + 1;
 
     // epsilon-greedy method
-    if (getRandom() < EPSILON) {
-        if (getRandom(0, 1, true) == 1) {
+    if (random.get() < EPSILON) {
+        if (random.get(0, 1, true) == 1) {
             s = 2 * old + 2;
         }
     } else {
@@ -55,18 +57,4 @@ function updateValue(s, qValues) {
         updated = old + ALPHA * (GAMMA * max - old);
     }
     return updated;
-}
-
-function getRandom(minimum, maximum, integer) {
-    let min = minimum || 0,
-        max = maximum || 1,
-        int = integer || false,
-        value;
-
-    if (int)
-        value = Math.floor(Math.random() * (max - min)) + min;
-    else
-        value = Math.random() * (max - min) + min;
-
-    return value;
 }
