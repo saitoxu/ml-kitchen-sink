@@ -47,6 +47,18 @@ function walk() {
 
     for (m = 0; m < NOA; m++) {
         for (s = 0; s < STEP; s++) {
+            // if (pheromone[0][s] != 0 && pheromone[1][s] != 0) {
+            //     let a0 = Math.pow(pheromone[0][s], 1.0) * Math.pow((1.0 / cost[0][s]), 1.0);
+            //     let a1 = Math.pow(pheromone[1][s], 1.0) * Math.pow((1.0 / cost[1][s]), 1.0);
+            //     if (random.get() < (a0 / a0 + a1)) {
+            //         mstep[m][s] = 0;
+            //     } else {
+            //         mstep[m][s] = 1;
+            //     }
+            // } else {
+            //     mstep[m][s] = random.get(0, 1, true);
+            // }
+
             if ((random.get() < EPSILON) || (Math.abs(pheromone[0][s] - pheromone[1][s]) < 1e-9)) {
                 mstep[m][s] = random.get(0, 1, true);
             } else {
@@ -56,6 +68,22 @@ function walk() {
                     mstep[m][s] = 1;
                 }
             }
+
+            // if (random.get() < EPSILON || pheromone[0][s] == 0 || pheromone[1][s] == 0) {
+            //     c = cost[1][s] / (cost[0][s] + cost[1][s]);
+            //     if (random.get() < c) {
+            //         mstep[m][s] = 0;
+            //     } else {
+            //         mstep[m][s] = 1;
+            //     }
+            // } else {
+            //     t = pheromone[0][s] / (pheromone[0][s] + pheromone[1][s]);
+            //     if (random.get() < t) {
+            //         mstep[m][s] = 0;
+            //     } else {
+            //         mstep[m][s] = 1;
+            //     }
+            // }
         }
     }
     // console.log(mstep);
