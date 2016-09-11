@@ -4,7 +4,7 @@ let fs = require('fs'),
     random = require('../lib/random.js'),
     test1 = { file: 'data.txt',  limit: 1000, pool: 10 },
     test2 = { file: 'data2.txt', limit:  300, pool: 50 },
-    test = test2; // to change test data
+    test = test1; // to change test data
 
 const POOLSIZE = test.pool;
 const LAST = 50;
