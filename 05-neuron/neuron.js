@@ -1,6 +1,7 @@
 'use strict';
 
-let fs = require('fs');
+let fs = require('fs'),
+    Neuron = require('../lib/neuron.js');
 
 fs.readFile('data.txt', (err, data) => {
     let input = initInput(data),
@@ -30,19 +31,3 @@ fs.readFile('data.txt', (err, data) => {
         return input;
     }
 });
-
-class Neuron {
-    constructor(w, v, f) {
-        this.w = w;
-        this.v = v;
-        this.f = f;
-    }
-
-    forward(input) {
-        let i, sum = 0;
-        for (i = 0; i < input.length; i++) {
-            sum += input[i] * this.w[i];
-        }
-        return this.f(sum - this.v);
-    }
-}
