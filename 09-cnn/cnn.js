@@ -16,8 +16,8 @@ const ALPHA = 10;
 fs.readFile('data.txt', (err, data) => {
     let input = decode(data.toString()),
         filters = [],
-        i, j,
-        fc = new FCLayer(),
+        i, j, m, n,
+        fc = new FCLayer(f),
         error = INITIALERR;
 
     for (i = 0; i < FILTERNO; i++) {
@@ -28,10 +28,38 @@ fs.readFile('data.txt', (err, data) => {
         error = 0.0;
         for (i = 0; i < input.length; i++) {
             for (j = 0; j < FILTERNO; j++) {
-                let convOut = filters[j].conv(input[i].getImage());
+                let convOut = filters[j].conv(input[i].getImage()),
+                    poolOut = pool(convOut);
+
+                for (m = 0; m < POOLOUTSIZE; m++) {
+                    for (n = 0; n < POOLOUTSIZE; n++) {
+                        // TODO
+                    }
+                }
             }
-            // TODO
         }
+    }
+
+    function pool(convOut) {
+        let i, j, ary,
+            poolOut = [];
+        for (i = 0; i < POOLSIZE; i++) {
+            poolOut.push(ary = []);
+            for (j = 0; j < POOLSIZE; j++) {
+                ary.push(maxPooling(convOut, i, j));
+            }
+        }
+        return poolOut;
+    }
+
+    function maxPooling(convOut, i, j) {
+        let m, n, max = 0.0;
+        for (m = POOLOUTSIZE * i; m < POOLOUTSIZE * (i + 1); m++) {
+            for (n = POOLOUTSIZE * j; n < POOLOUTSIZE * (j + 1); n++) {
+                if (max < convOut[m][n]) max = convOut[m][n];
+            }
+        }
+        return max;
     }
 
     function decode(data) {
@@ -52,6 +80,10 @@ fs.readFile('data.txt', (err, data) => {
         }
         return input;
     }
+
+    function f(u) {
+        return 1.0 / (1.0 + Math.exp(-u));
+    }
 });
 
 class Filter {
@@ -59,6 +91,7 @@ class Filter {
         let i, j, ary,
             s = size || FILTERSIZE;
         this.filter = [];
+        this.size = s;
         for (i = 0; i < s; i++) {
             this.filter.push(ary = []);
             for (j = 0; j < s; j++) {
@@ -73,18 +106,24 @@ class Filter {
 
     conv(image) {
         let i, j, row,
-            convOut = [],
-            start = Math.floor(FILTERSIZE / 2);
-        for (i = start; i < INPUTSIZE - start; i++) {
+            convOut = [];
+        for (i = 0; i < INPUTSIZE - (this.size - 1); i++) {
             convOut.push(row = []);
-            for (j = start; j < INPUTSIZE - start; j++) {
+            for (j = 0; j < INPUTSIZE - (this.size - 1); j++) {
                 row.push(this.calcConv(image, i, j));
             }
         }
+        return convOut;
     }
 
     calcConv(image, i, j) {
-        return 0; // TODO
+        let m, n, sum = 0;
+        for (m = 0; m < this.size; m++) {
+            for (n = 0; n < this.size; n++) {
+                sum += image[i + m][j + n] * this.filter[m][n];
+            }
+        }
+        return sum;
     }
 }
 
@@ -111,11 +150,13 @@ class InputData {
     }
 }
 
+// TODO use Neuron
 class FCLayer { // fully connected layer
-    constructor() {
+    constructor(f) {
         let i, j, ary;
         this.interLayer = [];
         this.outputLayer = [];
+        this.f = f;
         for (i = 0; i < HIDDENNO; i++) {
             this.interLayer.push(ary = []);
             for (j = 0; j < POOLOUTSIZE * POOLOUTSIZE * FILTERNO + 1; j++) {
@@ -133,5 +174,10 @@ class FCLayer { // fully connected layer
 
     getOutputLayer() {
         return this.outputLayer;
+    }
+
+    forward(e) {
+        let i, j, u, o;
+        // TODO
     }
 }
