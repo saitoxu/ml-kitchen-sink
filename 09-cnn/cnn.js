@@ -1,7 +1,6 @@
 'use strict';
 
 let fs = require('fs'),
-    random = require('../lib/random.js'),
     Filter = require('./filter.js'),
     FCLayer = require('./fclayer.js'),
     InputData = require('./inputdata.js');
@@ -20,9 +19,9 @@ fs.readFile('data.txt', (err, data) => {
     let input = decode(data.toString()),
         filters = [],
         i, j, m, n, o,
-        fc = new FCLayer(f, HIDDENNO, POOLOUTSIZE, FILTERNO, ALPHA),
+        max = POOLOUTSIZE * POOLOUTSIZE * FILTERNO,
+        fc = new FCLayer(f, HIDDENNO, max, ALPHA),
         ef = [],
-        count = 0,
         error = INITIALERR;
 
     for (i = 0; i < FILTERNO; i++) {
@@ -48,7 +47,6 @@ fs.readFile('data.txt', (err, data) => {
             fc.learnInterLayer(ef);
             error += (o - input[i].getTeacher()) * (o - input[i].getTeacher());
         }
-        // console.log('%d\t%d', ++count, error);
     }
 
     for (i = 0; i < input.length; i++) {
