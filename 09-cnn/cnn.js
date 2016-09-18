@@ -1,7 +1,10 @@
 'use strict';
 
 let fs = require('fs'),
-    random = require('../lib/random.js');
+    random = require('../lib/random.js'),
+    Filter = require('./filter.js'),
+    FCLayer = require('./fclayer.js'),
+    InputData = require('./inputdata.js');
 
 const INPUTSIZE = 11;
 const FILTERNO = 2;
@@ -16,12 +19,14 @@ const ALPHA = 10;
 fs.readFile('data.txt', (err, data) => {
     let input = decode(data.toString()),
         filters = [],
-        i, j, m, n,
-        fc = new FCLayer(f),
+        i, j, m, n, o,
+        fc = new FCLayer(f, HIDDENNO, POOLOUTSIZE, FILTERNO, ALPHA),
+        ef = [],
+        count = 0,
         error = INITIALERR;
 
     for (i = 0; i < FILTERNO; i++) {
-        filters.push(new Filter());
+        filters.push(new Filter(FILTERSIZE, INPUTSIZE));
     }
 
     while (error > LIMIT) {
@@ -33,11 +38,33 @@ fs.readFile('data.txt', (err, data) => {
 
                 for (m = 0; m < POOLOUTSIZE; m++) {
                     for (n = 0; n < POOLOUTSIZE; n++) {
-                        // TODO
+                        ef[j * POOLOUTSIZE * POOLOUTSIZE + POOLOUTSIZE * m + n] = poolOut[m][n];
                     }
                 }
+                ef[POOLOUTSIZE * POOLOUTSIZE * FILTERNO] = input[i].getTeacher();
             }
+            o = fc.forward(ef);
+            fc.learnOutputLayer(ef);
+            fc.learnInterLayer(ef);
+            error += (o - input[i].getTeacher()) * (o - input[i].getTeacher());
         }
+        // console.log('%d\t%d', ++count, error);
+    }
+
+    for (i = 0; i < input.length; i++) {
+        for (j = 0; j < FILTERNO; j++) {
+            let convOut = filters[j].conv(input[i].getImage()),
+                poolOut = pool(convOut);
+
+            for (m = 0; m < POOLOUTSIZE; m++) {
+                for (n = 0; n < POOLOUTSIZE; n++) {
+                    ef[j * POOLOUTSIZE * POOLOUTSIZE + POOLOUTSIZE * m + n] = poolOut[m][n];
+                }
+            }
+            ef[POOLOUTSIZE * POOLOUTSIZE * FILTERNO] = input[i].getTeacher();
+        }
+        o = fc.forward(ef);
+        console.log('%d\t%d\t%d', i, input[i].getTeacher(), o);
     }
 
     function pool(convOut) {
@@ -85,99 +112,3 @@ fs.readFile('data.txt', (err, data) => {
         return 1.0 / (1.0 + Math.exp(-u));
     }
 });
-
-class Filter {
-    constructor(size) {
-        let i, j, ary,
-            s = size || FILTERSIZE;
-        this.filter = [];
-        this.size = s;
-        for (i = 0; i < s; i++) {
-            this.filter.push(ary = []);
-            for (j = 0; j < s; j++) {
-                ary.push(random.get(-1, 1, false));
-            }
-        }
-    }
-
-    get() {
-        return this.filter;
-    }
-
-    conv(image) {
-        let i, j, row,
-            convOut = [];
-        for (i = 0; i < INPUTSIZE - (this.size - 1); i++) {
-            convOut.push(row = []);
-            for (j = 0; j < INPUTSIZE - (this.size - 1); j++) {
-                row.push(this.calcConv(image, i, j));
-            }
-        }
-        return convOut;
-    }
-
-    calcConv(image, i, j) {
-        let m, n, sum = 0;
-        for (m = 0; m < this.size; m++) {
-            for (n = 0; n < this.size; n++) {
-                sum += image[i + m][j + n] * this.filter[m][n];
-            }
-        }
-        return sum;
-    }
-}
-
-class InputData {
-    constructor() {
-        this.teacher = null;
-        this.image = null;
-    }
-
-    getTeacher() {
-        return this.teacher;
-    }
-
-    setTeacher(teacher) {
-        this.teacher = teacher;
-    }
-
-    getImage() {
-        return this.image;
-    }
-
-    setImage(image) {
-        this.image = image;
-    }
-}
-
-// TODO use Neuron
-class FCLayer { // fully connected layer
-    constructor(f) {
-        let i, j, ary;
-        this.interLayer = [];
-        this.outputLayer = [];
-        this.f = f;
-        for (i = 0; i < HIDDENNO; i++) {
-            this.interLayer.push(ary = []);
-            for (j = 0; j < POOLOUTSIZE * POOLOUTSIZE * FILTERNO + 1; j++) {
-                ary.push(random.get(-1, 1, false));
-            }
-        }
-        for (i = 0; i < HIDDENNO; i++) {
-            this.outputLayer.push(random.get(-1, 1, false));
-        }
-    }
-
-    getInterLayer() {
-        return this.interLayer;
-    }
-
-    getOutputLayer() {
-        return this.outputLayer;
-    }
-
-    forward(e) {
-        let i, j, u, o;
-        // TODO
-    }
-}
