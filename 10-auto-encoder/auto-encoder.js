@@ -12,16 +12,20 @@ const fs = require('fs'),
 
 fs.readFile('data.txt', (err, data) => {
   const input = decode(data.toString());
-  let error = INITIALERR;
+  let error = INITIALERR, o;
+  const fc = new FCLayer(f, HIDDENNO, INPUTSIZE, ALPHA, OUTPUTSIZE);
 
   while (error > LIMIT) {
-    for (let k = 0; k < OUTPUTSIZE; k++) {
-      error = 0.0;
-      for (let j = 0; j < input.length; j++) {
-
+    error = 0.0;
+    for (let j = 0; j < input.length; j++) {
+      o = fc.forward(input[j].getImage());
+      for (let k = 0; k < OUTPUTSIZE; k++) {
+        error += (o[k] - input[j].getTeacher()[k]) * (o[k] - input[j].getTeacher()[k]);
       }
+      console.log("error = %d", error);
     }
   }
+  console.log("end");
 
   function decode(data) {
     let input = [], image, teacher;
@@ -42,5 +46,9 @@ fs.readFile('data.txt', (err, data) => {
       input.push(indata);
     }
     return input;
+  }
+
+  function f(u) {
+      return 1.0 / (1.0 + Math.exp(-u));
   }
 });

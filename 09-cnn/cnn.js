@@ -20,7 +20,7 @@ fs.readFile('data.txt', (err, data) => {
         filters = [],
         i, j, m, n, o,
         max = POOLOUTSIZE * POOLOUTSIZE * FILTERNO,
-        fc = new FCLayer(f, HIDDENNO, max, ALPHA),
+        fc = new FCLayer(f, HIDDENNO, max, ALPHA, 1),
         ef = [],
         error = INITIALERR;
 
@@ -42,7 +42,7 @@ fs.readFile('data.txt', (err, data) => {
                 }
                 ef[POOLOUTSIZE * POOLOUTSIZE * FILTERNO] = input[i].getTeacher();
             }
-            o = fc.forward(ef);
+            o = fc.forward(ef)[0];
             fc.learnOutputLayer(ef);
             fc.learnInterLayer(ef);
             error += (o - input[i].getTeacher()) * (o - input[i].getTeacher());
