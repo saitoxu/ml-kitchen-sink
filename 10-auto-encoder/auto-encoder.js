@@ -5,27 +5,33 @@ const fs = require('fs'),
       FCLayer = require('../09-cnn/fclayer.js'),
       INPUTSIZE = 9,
       OUTPUTSIZE = 9,
-      HIDDENNO = 2,
+      HIDDENNO = 5,
       ALPHA = 10,
       INITIALERR = 100,
       LIMIT = 0.001;
 
 fs.readFile('data.txt', (err, data) => {
   const input = decode(data.toString());
-  let error = INITIALERR, o;
-  const fc = new FCLayer(f, HIDDENNO, INPUTSIZE, ALPHA, OUTPUTSIZE);
+  const fc = new FCLayer(f, HIDDENNO, ALPHA, INPUTSIZE, OUTPUTSIZE);
+  let error = INITIALERR;
 
   while (error > LIMIT) {
     error = 0.0;
-    for (let j = 0; j < input.length; j++) {
-      o = fc.forward(input[j].getImage());
+    for (let i = 0; i < input.length; i++) {
+      const o = fc.forward(input[i]);
+      fc.learnOutputLayer(input[i]);
+      fc.learnHiddenLayer(input[i]);
       for (let k = 0; k < OUTPUTSIZE; k++) {
-        error += (o[k] - input[j].getTeacher()[k]) * (o[k] - input[j].getTeacher()[k]);
+        error += (o[k] - input[i].getTeacher()[k]) * (o[k] - input[i].getTeacher()[k]);
       }
-      console.log("error = %d", error);
     }
   }
-  console.log("end");
+
+  for (let i = 0; i < input.length; i++) {
+    console.log('Input %d: ', i + 1);
+    console.log(input[i].getImage());
+    console.log(fc.forward(input[i]) + '\n');
+  }
 
   function decode(data) {
     let input = [], image, teacher;

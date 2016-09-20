@@ -18,9 +18,9 @@ const ALPHA = 10;
 fs.readFile('data.txt', (err, data) => {
     let input = decode(data.toString()),
         filters = [],
-        i, j, m, n, o,
+        i, j, m, n,
         max = POOLOUTSIZE * POOLOUTSIZE * FILTERNO,
-        fc = new FCLayer(f, HIDDENNO, max, ALPHA, 1),
+        fc = new FCLayer(f, HIDDENNO, ALPHA, max, 1),
         ef = [],
         error = INITIALERR;
 
@@ -31,6 +31,7 @@ fs.readFile('data.txt', (err, data) => {
     while (error > LIMIT) {
         error = 0.0;
         for (i = 0; i < input.length; i++) {
+            let data = new InputData();
             for (j = 0; j < FILTERNO; j++) {
                 let convOut = filters[j].conv(input[i].getImage()),
                     poolOut = pool(convOut);
@@ -40,16 +41,18 @@ fs.readFile('data.txt', (err, data) => {
                         ef[j * POOLOUTSIZE * POOLOUTSIZE + POOLOUTSIZE * m + n] = poolOut[m][n];
                     }
                 }
-                ef[POOLOUTSIZE * POOLOUTSIZE * FILTERNO] = input[i].getTeacher();
             }
-            o = fc.forward(ef)[0];
-            fc.learnOutputLayer(ef);
-            fc.learnInterLayer(ef);
+            data.setImage(ef);
+            data.setTeacher(input[i].getTeacher());
+            let o = fc.forward(data)[0];
+            fc.learnOutputLayer(data);
+            fc.learnHiddenLayer(data);
             error += (o - input[i].getTeacher()) * (o - input[i].getTeacher());
         }
     }
 
     for (i = 0; i < input.length; i++) {
+        let data = new InputData();
         for (j = 0; j < FILTERNO; j++) {
             let convOut = filters[j].conv(input[i].getImage()),
                 poolOut = pool(convOut);
@@ -59,9 +62,10 @@ fs.readFile('data.txt', (err, data) => {
                     ef[j * POOLOUTSIZE * POOLOUTSIZE + POOLOUTSIZE * m + n] = poolOut[m][n];
                 }
             }
-            ef[POOLOUTSIZE * POOLOUTSIZE * FILTERNO] = input[i].getTeacher();
         }
-        o = fc.forward(ef);
+        data.setImage(ef);
+        data.setTeacher(input[i].getTeacher());
+        let o = fc.forward(data)[0];
         console.log('%d\t%d\t%d', i, input[i].getTeacher(), o);
     }
 
@@ -96,7 +100,7 @@ fs.readFile('data.txt', (err, data) => {
             if (i % (INPUTSIZE + 1) == 0) {
                 indata = new InputData();
                 image = [];
-                indata.setTeacher(parseInt(lines[i]));
+                indata.setTeacher([parseInt(lines[i])]);
                 indata.setImage(image);
                 input.push(indata);
             } else {

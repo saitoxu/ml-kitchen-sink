@@ -2,120 +2,92 @@
 
 let random = require('../lib/random.js');
 
-class FCLayer { // fully connected layer
-  constructor(f, hiddenNo, max, alpha, outputNo) {
-    let i, j, ary;
-    this.interLayer = [];
-    this.outputLayer = [];
+/**
+ * fully connected layer
+ * only untied weight is supported
+ */
+class FCLayer {
+  constructor(f, hiddenNo, alpha, inputNo, outputNo) {
     this.f = f;
     this.hiddenNo = hiddenNo;
-    this.max = max;
     this.alpha = alpha;
+    this.hiddenW = [];
+    this.hiddenV = [];
+    this.outputW = [];
+    this.outputV = [];
+    this.inputNo = inputNo;
     this.outputNo = outputNo;
-    for (i = 0; i < this.hiddenNo; i++) {
-      this.interLayer.push(ary = []);
-      for (j = 0; j < this.max + 1; j++) {
-        ary.push(random.get(-1, 1, false));
+
+    for (let i = 0; i < this.hiddenNo; i++) {
+      let hiddenW = [];
+      for (let j = 0; j < this.inputNo; j++) {
+        hiddenW.push(random.get(-1, 1, false));
       }
+      this.hiddenW.push(hiddenW);
     }
-    for (i = 0; i < this.outputNo; i++) {
-      let weight = [];
-      for (j = 0; j < this.hiddenNo + 1; j++) {
-        weight.push(random.get(-1, 1, false));
+    for (let i = 0; i < this.hiddenNo; i++) {
+      this.hiddenV.push(random.get(-1, 1, false));
+    }
+
+    for (let i = 0; i < this.outputNo; i++) {
+      let outputW = [];
+      for (let j = 0; j < this.hiddenNo; j++) {
+        outputW.push(random.get(-1, 1, false));
       }
-      this.outputLayer.push(weight);
+      this.outputW.push(outputW);
+    }
+    for (let i = 0; i < this.outputNo; i++) {
+      this.outputV.push(random.get(-1, 1, false));
     }
   }
 
-  getInterLayer() {
-    return this.interLayer;
+  forward(input) {
+    let hiddenO = [];
+    for (let h = 0; h < this.hiddenNo; h++) {
+      let u = 0;
+      for (let i = 0; i < this.inputNo; i++) {
+        u += input.getImage()[i] * this.hiddenW[h][i];
+      }
+      u -= this.hiddenV[h];
+      hiddenO[h] = this.f(u);
+    }
+    this.hiddenO = hiddenO;
+
+    let outputO = [];
+    for (let o = 0; o < this.outputNo; o++) {
+      let u = 0;
+      for (let h = 0; h < this.hiddenNo; h++) {
+        u += this.hiddenO[h] * this.outputW[o][h];
+      }
+      u -= this.outputV[o];
+      outputO[o] = this.f(u);
+    }
+    return this.outputO = outputO;
   }
 
-  getOutputLayer() {
-    return this.outputLayer;
+  learnOutputLayer(input) {
+    for (let o = 0; o < this.outputNo; o++) {
+      let d = (input.getTeacher()[o] - this.outputO[o]) * this.outputO[o] * (1 - this.outputO[o]);
+      for (let h = 0; h < this.hiddenNo; h++) {
+        this.outputW[o][h] += this.alpha * this.hiddenO[h] * d;
+      }
+      this.outputV[o] += this.alpha * (-1.0) * d;
+    }
   }
 
-  forward(e) {
-    let i, j, u, o = [], innerO, hi = [], innerHi;
-    for (let k = 0; k < this.outputNo; k++) {
-      innerHi = [];
-      for (i = 0; i < this.hiddenNo; i++) {
-        u = 0;
-        for (j = 0; j < this.max; j++) {
-          u += e[j] * this.interLayer[i][j];
-        }
-        u -= this.interLayer[i][j]; // last value is threshold of intermediate layer
-        innerHi[i] = this.f(u); // output value of intermediate layer
+  learnHiddenLayer(input) {
+    for (let h = 0; h < this.hiddenNo; h++) {
+      let d = 0;
+      for (let o = 0; o < this.outputNo; o++) {
+        d += this.hiddenO[h] * (1 - this.hiddenO[h]) * this.outputW[o][h] *
+            (input.getTeacher()[o] - this.outputO[o]) * this.outputO[o] * (1 - this.outputO[o]);
       }
-      innerO = 0;
-      for (i = 0; i < this.hiddenNo; i++) {
-        innerO += innerHi[i] * this.outputLayer[k][i];
+      d = d / this.outputNo;
+      for (let i = 0; i < this.inputNo; i++) {
+        this.hiddenW[h][i] += this.alpha * input.getImage()[i] * d;
       }
-      hi.push(innerHi);
-      innerO -= this.outputLayer[k][i]; // last value is threshold of output layer
-      o.push(this.f(innerO));
+      this.hiddenV[h] += this.alpha * (-1.0) * d;
     }
-    this.hi = hi;
-    return this.o = o;
-
-    /* for (i = 0; i < this.hiddenNo; i++) {
-        u = 0;
-        for (j = 0; j < this.max; j++) {
-            u += e[j] * this.interLayer[i][j];
-        }
-        u -= this.interLayer[i][j]; // last value is threshold of intermediate layer
-        hi[i] = this.f(u); // output value of intermediate layer
-    }
-    this.hi = hi; // output of intermediate layer
-
-    o = 0;
-    for (i = 0; i < this.hiddenNo; i++) {
-        o += hi[i] * this.outputLayer[i];
-    }
-    o -= this.outputLayer[i]; // last value is threshold of output layer
-    return this.o = this.f(o); */
-  }
-
-  learnOutputLayer(e) {
-    let i, d;
-    for (let k = 0; k < this.outputNo; k++) {
-      d = (e[this.max] - this.o[k]) * this.o[k] * (1 - this.o[k]);
-      for (i = 0; i < this.hiddenNo; i++) {
-        this.outputLayer[k][i] += this.alpha * this.hi[k][i] * d;
-      }
-      this.outputLayer[k][i] += this.alpha * (-1.0) * d;
-    }
-
-    /* let i, d;
-    d = (e[this.max] - this.o) * this.o * (1 - this.o);
-    for (i = 0; i < this.hiddenNo; i++) {
-        this.outputLayer[i] += this.alpha * this.hi[i] * d;
-    }
-    this.outputLayer[i] += this.alpha * (-1.0) * d; */
-  }
-
-  learnInterLayer(e) {
-    let i, j;
-    for (let k = 0; k < this.outputNo; k++) {
-      for (j = 0; j < this.hiddenNo; j++) {
-        let dj = this.hi[k][j] * (1 - this.hi[k][j]) * this.outputLayer[k][j] *
-            (e[this.max] - this.o[k]) * this.o[k] * (1 - this.o[k]);
-        for (i = 0; i < this.max; i++) {
-          this.interLayer[j][i] += this.alpha * e[i] * dj;
-        }
-        this.interLayer[j][i] += this.alpha * (-1.0) * dj;
-      }
-    }
-
-    /* let i, j, dj;
-    for (j = 0; j < this.hiddenNo; j++) {
-        dj = this.hi[j] * (1 - this.hi[j]) * this.outputLayer[j] *
-                (e[this.max] - this.o) * this.o * (1 - this.o);
-        for (i = 0; i < this.max; i++) {
-            this.interLayer[j][i] += this.alpha * e[i] * dj;
-        }
-        this.interLayer[j][i] += this.alpha * (-1.0) * dj;
-    } */
   }
 }
 
