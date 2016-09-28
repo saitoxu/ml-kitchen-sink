@@ -1,42 +1,49 @@
+/**
+ * Inductive Learning
+ *
+ * Learning a model which is the best to match training data inductively
+ */
 'use strict';
 
-const fs = require('fs');
-const LEARNING_COUNT = 10000;
+const fs = require('fs'),
+      LEARNING_COUNT = 10000,
+      teachers = readData(fs.readFileSync('learning.txt').toString()),
+      size = teachers[0].length - 1;
+let bestScore = 0,
+    result,
+    score,
+    candidate;
 
-fs.readFile('learning.txt', (err, data) => {
-  let teachers = readData(data),
-      size = teachers[0].length - 1,
-      bestScore = 0,
-      result, score, candidate;
+for (let i = 0; i < LEARNING_COUNT; i++) {
+  candidate = makeCandidate(size);
+  score = calcScore(candidate, teachers);
+  console.log(candidate.join(' ') + ' :score = ' + score);
 
-  for (let i = 0; i < LEARNING_COUNT; i++) {
-    candidate = makeCandidate(size);
-    score = calcScore(candidate, teachers);
-    console.log(candidate.join(' ') + ' :score = ' + score);
-
-    if (score > bestScore) {
-      result = candidate;
-      bestScore = score;
-    }
+  if (score > bestScore) {
+    result = candidate;
+    bestScore = score;
   }
+}
 
-  console.log('\nBest Answer');
-  console.log(result.join(' ') + ' :bestScore = ' + bestScore);
-  console.log('\nCheck');
+console.log('\nBest Answer');
+console.log(result.join(' ') + ' :bestScore = ' + bestScore);
+console.log('\nCheck');
 
-  fs.readFile('test.txt', (err, data) => {
-    let testData = readData(data),
-        score = calcScore(result, testData);
+const testData = readData(fs.readFileSync('test.txt').toString());
+console.log('Correct rate: ' + calcScore(result, testData) + ' / ' + testData.length);
 
-    console.log('Correct rate: ' + score + ' / ' + testData.length);
-  });
-});
-
-const calcScore = function(candidate, teachers) {
+/**
+ * Calculate score of given candidate
+ *
+ * @param  {Array} candidate
+ * @param  {Array} teachers
+ * @return {Number} score
+ */
+function calcScore(candidate, teachers) {
+  const dataSize = candidate.length,
+        maxPoint = dataSize,
+        resultDataIdx = dataSize;
   let score = 0,
-      dataSize = candidate.length,
-      maxPoint = dataSize,
-      resultDataIdx = dataSize,
       point,
       teacher;
 
@@ -44,8 +51,7 @@ const calcScore = function(candidate, teachers) {
     point = 0, teacher = teachers[i];
 
     for (let j = 0; j < dataSize; j++) {
-      if (candidate[j] == 2 ||
-        candidate[j] == teacher[j]) {
+      if (candidate[j] == 2 || candidate[j] == teacher[j]) {
         point++;
       }
     }
@@ -58,8 +64,14 @@ const calcScore = function(candidate, teachers) {
   return score;
 }
 
-const readData = function(data) {
-  const lines = data.toString().split('\n'),
+/**
+ * Read data from file
+ *
+ * @param  {String} data
+ * @return {Array}
+ */
+function readData(data) {
+  const lines = data.split('\n'),
         dataAry = [];
 
   for (let i = 0; i < lines.length - 1; i++) {
@@ -70,7 +82,13 @@ const readData = function(data) {
   return dataAry;
 }
 
-const makeCandidate = function(size) {
+/**
+ * Create a candidate
+ *
+ * @param  {Number} size
+ * @return {Array} candidate
+ */
+function makeCandidate(size) {
   const candidate = [];
 
   for (let i = 0; i < size; i++) {
