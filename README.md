@@ -20,7 +20,7 @@ Sample codes to study machine learning and deep learning
 Only `node` command is required. I tested all programs by the following version.
 
 ```bash
-% node --version
+$ node --version
 v4.5.0
 ```
 
