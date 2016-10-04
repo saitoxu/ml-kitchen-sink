@@ -1,12 +1,11 @@
 /**
  * Q Learning
  *
- * TODO
+ * Maze problem solved by Q Learning
  */
 'use strict';
 
-let random = require('../lib/random.js');
-
+const random = require('../lib/random.js');
 const GEN_MAX = 1000;
 const ALPHA = 0.1;
 const GAMMA = 0.9;
@@ -22,6 +21,10 @@ const REWARD = 1000;
   [ 0, 1, 0, 1, 1, 0, 1, 0 ],
   [ 0, 0, 0, 0, 0, 0, 3, 0 ],
 ]; */
+// 0: wall
+// 1: path
+// 2: start
+// 3: goal
 const maze = [
   [ 0, 2, 0, 0, 0, 0, 0, 0, 0, 0 ],
   [ 0, 1, 1, 1, 1, 0, 1, 1, 1, 0 ],
@@ -78,7 +81,8 @@ for (let i = 0; i < GEN_MAX; i++) {
 }
 
 /**
- * TODO
+ * Select next action
+ *
  * @param  {Object} pos
  * @param  {Number} epsilon
  * @return {Object} next
@@ -87,6 +91,7 @@ function selectAction(pos, epsilon) {
   const candidates = getSelectableMoves(pos);
   let next;
 
+  // epsilon-greedy method
   if (random.get() < epsilon) {
     const i = random.get(0, candidates.length - 1, true);
     next = candidates[i];
@@ -104,7 +109,8 @@ function selectAction(pos, epsilon) {
 }
 
 /**
- * TODO
+ * Return next selectable actions
+ *
  * @param  {Object} pos
  * @return {Array}
  */
@@ -128,7 +134,8 @@ function getSelectableMoves(pos) {
 }
 
 /**
- * TODO
+ * Update Q value
+ * 
  * @param  {Object} pos
  * @param  {Object} next
  * @return {Number} qValue

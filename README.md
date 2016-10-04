@@ -1,6 +1,6 @@
-# machine-learning-and-deep-learning
+# ML Kitchen Sink
 
-Sample codes to study machine learning and deep learning
+Sample code collection of study machine learning.
 
 ## Description
 
