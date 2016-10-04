@@ -1,6 +1,6 @@
 # ML Kitchen Sink
 
-Sample code collection of study machine learning.
+ML Kitchen Sink is a sample code collection of machine learning.
 
 ## Description
 
