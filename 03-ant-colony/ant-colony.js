@@ -1,7 +1,7 @@
 /**
  * Ant Colony
  *
- * 
+ * Shortest path problem
  */
 'use strict';
 
@@ -22,6 +22,9 @@ for (let i = 0; i < ILIMIT; i++) {
   update();
 }
 
+/**
+ * Update pheromones
+ */
 function update() {
   let sum = 0, min = 100, minAnt = -1;
 
@@ -52,13 +55,16 @@ function update() {
   console.log('Average distance: ' + sum / NOA);
 }
 
+/**
+ * Ants walk to next positions
+ */
 function walk() {
   for (let m = 0; m < NOA; m++) {
     mstep[m] = [ 0, 0, 0, 0 ]; // clear
     for (let s = 0; s < STEP; s++) {
       const current = s > 0 ? mstep[m][s - 1] : 0;
       if (random.get() < EPSILON || calcMaxDiffPheromons(current, mstep[m]) < 1e-9) {
-        mstep[m][s] = nextRandomStep(current, mstep[m]);
+        mstep[m][s] = nextRandomStep(mstep[m]);
       } else {
         mstep[m][s] = nextMaxStep(current, mstep[m]);
       }
@@ -66,12 +72,25 @@ function walk() {
   }
 }
 
-function nextRandomStep(current, step) {
+/**
+ * Return the next position randomly
+ *
+ * @param  {Array} steps
+ * @return {Number}
+ */
+function nextRandomStep(step) {
   const leftPoints = getLeftPoints(step),
         next = random.get(0, leftPoints.length - 1, true);
   return leftPoints[next];
 }
 
+/**
+ * Return the next position which has max pheromone density
+ *
+ * @param  {Number} current
+ * @param  {Array} step
+ * @return {Number} max max pheromone position
+ */
 function nextMaxStep(current, step) {
   const leftPoints = getLeftPoints(step),
         leftPointPheromons = getLeftPointPheromons(current, step);
@@ -84,6 +103,13 @@ function nextMaxStep(current, step) {
   return leftPoints[max];
 }
 
+/**
+ * Calculate max difference among pheromones
+ *
+ * @param  {Number} current
+ * @param  {Array} step
+ * @return {Number} maxDiff
+ */
 function calcMaxDiffPheromons(current, step) {
   const leftPointPheromons = getLeftPointPheromons(current, step),
         max = Math.max.apply({}, leftPointPheromons),
@@ -91,6 +117,13 @@ function calcMaxDiffPheromons(current, step) {
   return Math.abs(max - min);
 }
 
+/**
+ * Return pheromones of left positions
+ *
+ * @param  {Number} current
+ * @param  {Array} step
+ * @return {Array} pheromones
+ */
 function getLeftPointPheromons(current, step) {
   const leftPoints = getLeftPoints(step),
         leftPointPheromons = [];
@@ -101,6 +134,12 @@ function getLeftPointPheromons(current, step) {
   return leftPointPheromons;
 }
 
+/**
+ * Return left positions
+ *
+ * @param  {Array} step
+ * @return {Array} positions
+ */
 function getLeftPoints(step) {
   let leftPoints = [ 1, 2, 3, 4 ];
 
@@ -112,6 +151,9 @@ function getLeftPoints(step) {
   return leftPoints;
 }
 
+/**
+ * initialize variables
+ */
 function init() {
   distance = [
     //  s    a    b    c    d

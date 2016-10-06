@@ -1,0 +1,6 @@
+Generic Algorithm
+---
+
+## Description
+
+## Usage

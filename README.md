@@ -26,6 +26,8 @@ v4.5.0
 
 ## Usage
 
+Please refer `README` of each algorithm.
+
 ## Reference
 
 This is inspired by this book:
