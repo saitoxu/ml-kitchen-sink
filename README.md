@@ -2,7 +2,7 @@
 ML Kitchen Sink is a sample code collection of machine learning.
 
 ## Description
-The ollowings are all programs in this repository.
+The followings are all programs in this repository.
 
 I will add a new algorithm step by step.
 
