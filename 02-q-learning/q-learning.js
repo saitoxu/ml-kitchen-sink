@@ -1,149 +1,125 @@
-/**
- * Q Learning
- *
- * Maze problem solved by Q Learning
- */
 'use strict';
 
-const random = require('../lib/random.js');
-const GEN_MAX = 1000;
-const ALPHA = 0.1;
-const GAMMA = 0.9;
-const EPSILON = 0.3;
+const random = require('../lib/random');
+const MAX = 1000;
 const REWARD = 1000;
-/* const maze = [
-  [ 0, 2, 0, 0, 0, 0, 0, 0 ],
-  [ 0, 1, 1, 1, 1, 1, 1, 0 ],
-  [ 0, 1, 0, 0, 1, 0, 1, 0 ],
-  [ 0, 1, 0, 1, 1, 0, 0, 0 ],
-  [ 0, 1, 0, 1, 0, 0, 1, 0 ],
-  [ 0, 1, 1, 1, 1, 1, 1, 0 ],
-  [ 0, 1, 0, 1, 1, 0, 1, 0 ],
-  [ 0, 0, 0, 0, 0, 0, 3, 0 ],
-]; */
-// 0: wall
-// 1: path
-// 2: start
-// 3: goal
-const maze = [
-  [ 0, 2, 0, 0, 0, 0, 0, 0, 0, 0 ],
-  [ 0, 1, 1, 1, 1, 0, 1, 1, 1, 0 ],
-  [ 0, 1, 0, 0, 1, 1, 1, 0, 1, 0 ],
-  [ 0, 1, 0, 1, 1, 0, 0, 1, 1, 0 ],
-  [ 0, 1, 0, 1, 0, 0, 1, 0, 1, 0 ],
-  [ 0, 1, 1, 1, 1, 0, 1, 1, 1, 0 ],
-  [ 0, 1, 0, 1, 1, 1, 1, 0, 1, 3 ],
-  [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
-];
-const qValues = [];
 
-// initialize Q values
-for (let i = 0; i < maze.length; i++) {
-  const row = [];
-  for (let j = 0; j < maze[0].length; j++) {
-    row.push(random.get(0, 100, true));
-  }
-  qValues.push(row);
-}
-
-// Q learning
-for (let i = 0; i < GEN_MAX; i++) {
-  let pos = { row: 0, col: 1 }; // start
-  while (maze[pos.row][pos.col] != 3) {
-    const next = selectAction(pos, EPSILON);
-    qValues[pos.row][pos.col] = updateQValue(pos, next);
-    pos = next;
-  }
-}
-
-// Print
-{
-  let pos = { row: 0, col: 1 };
-  while (maze[pos.row][pos.col] != 3) {
-    const next = selectAction(pos, 0);
-    maze[pos.row][pos.col] = 4;
-    pos = next;
+class QLearning {
+  constructor(maze, alpha, gamma, epsilon) {
+    this._maze = maze;
+    this._alpha = alpha;
+    this._gamma = gamma;
+    this._epsilon = epsilon;
+    this._max = MAX;
+    this._reward = REWARD;
+    this._qValues = this._initQValues(maze);
+    this._start = this._findStartPos(maze);
   }
 
-  const yellow   = '\u001b[33m',
-        reset   = '\u001b[0m';
-  for (let i = 0; i < maze.length; i++) {
-    let line = '';
-    for (let j = 0; j < maze[0].length; j++) {
-      if (maze[i][j] == 4) {
-        line += yellow + maze[i][j] + reset + ' ';
-      } else {
-        line += maze[i][j] + ' ';
-      }
-    }
-    console.log(line);
-  }
-}
-
-/**
- * Select next action
- *
- * @param  {Object} pos
- * @param  {Number} epsilon
- * @return {Object} next
- */
-function selectAction(pos, epsilon) {
-  const candidates = getSelectableMoves(pos);
-  let next;
-
-  // epsilon-greedy method
-  if (random.get() < epsilon) {
-    const i = random.get(0, candidates.length - 1, true);
-    next = candidates[i];
-  } else {
-    let max = 0;
-    for (const candidate of candidates) {
-      const reward = maze[candidate.row][candidate.col] == 3 ? REWARD : 0;
-      if (qValues[candidate.row][candidate.col] + reward >= max) {
-        max = qValues[candidate.row][candidate.col] + reward;
-        next = candidate;
+  learn() {
+    for (let i = 0; i < this._max; i++) {
+      let pos = this._start;
+      while (this._maze[pos.row][pos.col] != 3) {
+        const next = this._selectAction(pos, this._epsilon);
+        this._qValues[pos.row][pos.col] = this._updateQValue(pos, next);
+        pos = next;
       }
     }
   }
-  return next;
+
+  print() {
+    const yellow = '\u001b[33m';
+    const reset = '\u001b[0m';
+    let pos = this._start;
+    while (this._maze[pos.row][pos.col] != 3) {
+      const next = this._selectAction(pos, 0);
+      this._maze[pos.row][pos.col] = 4;
+      pos = next;
+    }
+
+    for (let i = 0; i < this._maze.length; i++) {
+      let line = '';
+      for (let j = 0; j < this._maze[0].length; j++) {
+        if (this._maze[i][j] == 4) {
+          line += yellow + this._maze[i][j] + reset + ' ';
+        } else {
+          line += this._maze[i][j] + ' ';
+        }
+      }
+      console.log(line);
+    }
+  }
+
+  _initQValues(maze) {
+    const qValues = [];
+    for (let i = 0; i < maze.length; i++) {
+      const row = [];
+      for (let j = 0; j < maze[0].length; j++) {
+        row.push(random.get(0, 100, true));
+      }
+      qValues.push(row);
+    }
+    return qValues;
+  }
+
+  _findStartPos(maze) {
+    for (let i = 0; i < maze.length; i++) {
+      for (let j = 0; j < maze[0].length; j++) {
+        if (maze[i][j] == 2)
+          return { row: i, col: j };
+      }
+    }
+    throw new Error('There must be a start position.');
+  }
+
+  _selectAction(pos, epsilon) {
+    const candidates = this._getSelectableMoves(pos);
+    let next;
+
+    // epsilon-greedy method
+    if (random.get() < epsilon) {
+      const i = random.get(0, candidates.length - 1, true);
+      next = candidates[i];
+    } else {
+      let max = 0;
+      for (const candidate of candidates) {
+        const reward = this._maze[candidate.row][candidate.col] == 3 ? this._reward : 0;
+        if (this._qValues[candidate.row][candidate.col] + reward >= max) {
+          max = this._qValues[candidate.row][candidate.col] + reward;
+          next = candidate;
+        }
+      }
+    }
+    return next;
+  }
+
+  _getSelectableMoves(pos) {
+    const moves = [];
+    const maze = this._maze;
+
+    if (pos.row != 0 && maze[pos.row - 1][pos.col] != 0) {
+      moves.push({ row: pos.row - 1, col: pos.col }); // up
+    }
+    if (pos.col != maze[0].length - 1 && maze[pos.row][pos.col + 1] != 0) {
+      moves.push({ row: pos.row, col: pos.col + 1 }); // right
+    }
+    if (pos.row != maze.length - 1 && maze[pos.row + 1][pos.col] != 0) {
+      moves.push({ row: pos.row + 1, col: pos.col }); // down
+    }
+    if (pos.col != 0 && maze[pos.row][pos.col - 1] != 0) {
+      moves.push({ row: pos.row, col: pos.col - 1 }); // left
+    }
+
+    return moves;
+  }
+
+  _updateQValue(pos, next) {
+    let currQ = this._qValues[pos.row][pos.col],
+        nextQ = this._qValues[next.row][next.col],
+        reward = this._maze[next.row][next.col] == 3 ? this._reward : 0;
+
+    return currQ + this._alpha * (reward + this._gamma * nextQ - currQ);
+  }
 }
 
-/**
- * Return next selectable actions
- *
- * @param  {Object} pos
- * @return {Array}
- */
-function getSelectableMoves(pos) {
-  const moves = [];
-
-  if (pos.row != 0 && maze[pos.row - 1][pos.col] != 0) {
-    moves.push({ row: pos.row - 1, col: pos.col }); // up
-  }
-  if (pos.col != maze[0].length - 1 && maze[pos.row][pos.col + 1] != 0) {
-    moves.push({ row: pos.row, col: pos.col + 1 }); // right
-  }
-  if (pos.row != maze.length - 1 && maze[pos.row + 1][pos.col] != 0) {
-    moves.push({ row: pos.row + 1, col: pos.col }); // down
-  }
-  if (pos.col != 0 && maze[pos.row][pos.col - 1] != 0) {
-    moves.push({ row: pos.row, col: pos.col - 1 }); // left
-  }
-
-  return moves;
-}
-
-/**
- * Update Q value
- * 
- * @param  {Object} pos
- * @param  {Object} next
- * @return {Number} qValue
- */
-function updateQValue(pos, next) {
-  let currQ = qValues[pos.row][pos.col],
-      nextQ = qValues[next.row][next.col],
-      reward = maze[next.row][next.col] == 3 ? REWARD : 0;
-
-  return currQ + ALPHA * (reward + GAMMA * nextQ - currQ);
-}
+module.exports = QLearning;
