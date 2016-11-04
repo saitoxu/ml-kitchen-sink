@@ -1,5 +1,3 @@
-'use strict';
-
 class InductiveLearning {
   constructor(count) {
     this._count = count;

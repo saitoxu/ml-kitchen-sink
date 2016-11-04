@@ -22,7 +22,7 @@ Only `node` command is required. I tested all programs by the following version 
 
 ```bash
 $ node --version
-v4.5.0
+v6.9.1
 ```
 
 ## Usage

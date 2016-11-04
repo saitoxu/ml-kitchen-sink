@@ -1,5 +1,3 @@
-'use strict';
-
 const InductiveLearning = require('./inductive-learning');
 const fs = require('fs');
 const teachers = readData(fs.readFileSync('learning.txt').toString());

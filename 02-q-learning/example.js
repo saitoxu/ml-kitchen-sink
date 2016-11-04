@@ -1,5 +1,3 @@
-'use strict';
-
 const QLearning = require('./q-learning');
 const ALPHA = 0.1;
 const GAMMA = 0.9;

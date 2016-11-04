@@ -1,5 +1,3 @@
-'use strict';
-
 const random = require('../lib/random');
 const MAX = 1000;
 const REWARD = 1000;
