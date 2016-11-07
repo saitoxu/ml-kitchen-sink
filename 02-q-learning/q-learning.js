@@ -1,15 +1,13 @@
 const random = require('../lib/random');
-const MAX = 1000;
-const REWARD = 1000;
 
 class QLearning {
-  constructor(maze, alpha, gamma, epsilon) {
+  constructor(maze, alpha, gamma, epsilon, max, reward) {
     this._maze = maze;
     this._alpha = alpha;
     this._gamma = gamma;
     this._epsilon = epsilon;
-    this._max = MAX;
-    this._reward = REWARD;
+    this._max = max;
+    this._reward = reward;
     this._qValues = this._initQValues(maze);
     this._start = this._findStartPos(maze);
   }
