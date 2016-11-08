@@ -1,179 +1,148 @@
-/**
- * Ant Colony
- *
- * Shortest path problem
- */
-'use strict';
+const random = require('../lib/random');
 
-const random = require('../lib/random.js');
-const NOA = 10;
-const ILIMIT = 100;
-const Q = 3;
-const RHO = 0.8;
-const STEP = 4;
-const EPSILON = 0.15;
+class AntColony {
+  constructor(number, limit, q, rho, epsilon, distance) {
+    this._number = number;
+    this._limit = limit;
+    this._q = q;
+    this._rho = rho;
+    this._epsilon = epsilon;
+    this._distance = distance;
+    this._step = distance[0].length - 1;
+    this._pheromone = this._initPheromone(distance);
+    this._mstep = this._initMStep(number, this._step);
+  }
 
-let distance, pheromone, mstep;
-
-init();
-
-for (let i = 0; i < ILIMIT; i++) {
-  walk();
-  update();
-}
-
-/**
- * Update pheromones
- */
-function update() {
-  let sum = 0, min = 100, minAnt = -1;
-
-  for (let i = 0; i < pheromone.length; i++) {
-    for (let j = 0; j < pheromone[i].length; j++) {
-      pheromone[i][j] *= RHO;
+  solve() {
+    for (let i = 0; i < this._limit; i++) {
+      this._walk(this._epsilon);
+      this._update();
     }
   }
 
-  for (let m = 0; m < NOA; m++) {
-    let d = distance[0][mstep[m][0]];
-    for (let i = 1; i < STEP; i++) {
-      d += distance[mstep[m][i - 1]][mstep[m][i]];
+  result() {
+    this._walk(0);
+    this._update();
+    return {
+      minRoute: this._mstep[0],
+      averageDistance: this._average
     }
-    if (min > d) {
-      min = d;
-      minAnt = m;
-    }
-
-    sum += d;
   }
 
-  pheromone[0][mstep[minAnt][0]] += Q * (1 / min);
-  for (let i = 1; i < STEP; i++) {
-    pheromone[mstep[minAnt][i - 1]][mstep[minAnt][i]] += Q * (1 / min);
-  }
-
-  console.log('Average distance: ' + sum / NOA);
-}
-
-/**
- * Ants walk to next positions
- */
-function walk() {
-  for (let m = 0; m < NOA; m++) {
-    mstep[m] = [ 0, 0, 0, 0 ]; // clear
-    for (let s = 0; s < STEP; s++) {
-      const current = s > 0 ? mstep[m][s - 1] : 0;
-      if (random.get() < EPSILON || calcMaxDiffPheromons(current, mstep[m]) < 1e-9) {
-        mstep[m][s] = nextRandomStep(mstep[m]);
-      } else {
-        mstep[m][s] = nextMaxStep(current, mstep[m]);
+  _walk(epsilon) {
+    for (let m = 0; m < this._number; m++) {
+      this._mstep[m] = []; // clear
+      for (let s = 0; s < this._step; s++) {
+        const current = s > 0 ? this._mstep[m][s - 1] : 0;
+        if (random.get() < epsilon || this._calcMaxDiffPheromons(current, this._mstep[m]) < 1e-9) {
+          this._mstep[m][s] = this._nextRandomStep(this._mstep[m]);
+        } else {
+          this._mstep[m][s] = this._nextMaxStep(current, this._mstep[m]);
+        }
       }
     }
   }
-}
 
-/**
- * Return the next position randomly
- *
- * @param  {Array} steps
- * @return {Number}
- */
-function nextRandomStep(step) {
-  const leftPoints = getLeftPoints(step),
-        next = random.get(0, leftPoints.length - 1, true);
-  return leftPoints[next];
-}
+  _update() {
+    let sum = 0,
+        min = 100,
+        minAnt = -1;
 
-/**
- * Return the next position which has max pheromone density
- *
- * @param  {Number} current
- * @param  {Array} step
- * @return {Number} max max pheromone position
- */
-function nextMaxStep(current, step) {
-  const leftPoints = getLeftPoints(step),
-        leftPointPheromons = getLeftPointPheromons(current, step);
-  let max = 0;
+    for (let i = 0; i < this._pheromone.length; i++) {
+      for (let j = 0; j < this._pheromone[i].length; j++) {
+        this._pheromone[i][j] *= this._rho;
+      }
+    }
 
-  for (let i = 1; i < leftPointPheromons.length; i++) {
-    if (leftPointPheromons[i] > leftPointPheromons[max])
-      max = i;
+    for (let m = 0; m < this._number; m++) {
+      let d = this._distance[0][this._mstep[m][0]];
+      for (let i = 1; i < this._step; i++) {
+        d += this._distance[this._mstep[m][i - 1]][this._mstep[m][i]];
+      }
+      if (min > d) {
+        min = d;
+        minAnt = m;
+      }
+
+      sum += d;
+    }
+
+    this._pheromone[0][this._mstep[minAnt][0]] += this._q * (1 / min);
+    for (let i = 1; i < this._step; i++) {
+      this._pheromone[this._mstep[minAnt][i - 1]][this._mstep[minAnt][i]] += this._q * (1 / min);
+    }
+
+    // console.log('Average distance: ' + sum / NOA);
+    this._average = sum / this._number;
   }
-  return leftPoints[max];
-}
 
-/**
- * Calculate max difference among pheromones
- *
- * @param  {Number} current
- * @param  {Array} step
- * @return {Number} maxDiff
- */
-function calcMaxDiffPheromons(current, step) {
-  const leftPointPheromons = getLeftPointPheromons(current, step),
-        max = Math.max.apply({}, leftPointPheromons),
-        min = Math.min.apply({}, leftPointPheromons);
-  return Math.abs(max - min);
-}
-
-/**
- * Return pheromones of left positions
- *
- * @param  {Number} current
- * @param  {Array} step
- * @return {Array} pheromones
- */
-function getLeftPointPheromons(current, step) {
-  const leftPoints = getLeftPoints(step),
-        leftPointPheromons = [];
-
-  for (let i = 0; i < leftPoints.length; i++) {
-    leftPointPheromons.push(pheromone[current][leftPoints[i]]);
+  _initPheromone(distance) {
+    const pheromone = [];
+    for (let i = 0; i < distance.length; i++) {
+      const ary = [];
+      for (let j = 0; j < distance[0].length; j++) {
+        ary.push(0.0);
+      }
+      pheromone.push(ary);
+    }
+    return pheromone;
   }
-  return leftPointPheromons;
-}
 
-/**
- * Return left positions
- *
- * @param  {Array} step
- * @return {Array} positions
- */
-function getLeftPoints(step) {
-  let leftPoints = [ 1, 2, 3, 4 ];
-
-  for (let i = 0; i < step.length && step[i] > 0; i++) {
-    leftPoints = leftPoints.filter(j => {
-      return j != step[i];
-    });
+  _initMStep(number, step) {
+    const mstep = [];
+    for (let i = 0; i < number; i++) {
+      const ary = [];
+      for (let j = 0; j < step; j++) {
+        ary.push(0);
+      }
+      mstep.push(ary);
+    }
+    return mstep;
   }
-  return leftPoints;
-}
 
-/**
- * initialize variables
- */
-function init() {
-  distance = [
-    //  s    a    b    c    d
-    [ 0.0, 4.0, 4.0, 4.7, 5.0 ], // start
-    [ 0.0, 0.0, 1.2, 2.5, 1.7 ], // a
-    [ 0.0, 1.2, 0.0, 1.0, 1.4 ], // b
-    [ 0.0, 2.5, 1.0, 0.0, 2.0 ], // c
-    [ 0.0, 1.7, 1.4, 2.0, 0.0 ]  // d
-  ];
+  _calcMaxDiffPheromons(current, step) {
+    const leftPointPheromons = this._getLeftPointPheromons(current, step);
+    const max = Math.max.apply({}, leftPointPheromons);
+    const min = Math.min.apply({}, leftPointPheromons);
+    return Math.abs(max - min);
+  }
 
-  pheromone = [
-    [ 0.0, 0.0, 0.0, 0.0, 0.0 ],
-    [ 0.0, 0.0, 0.0, 0.0, 0.0 ],
-    [ 0.0, 0.0, 0.0, 0.0, 0.0 ],
-    [ 0.0, 0.0, 0.0, 0.0, 0.0 ],
-    [ 0.0, 0.0, 0.0, 0.0, 0.0 ]
-  ];
+  _nextRandomStep(step) {
+    const leftPoints = this._getLeftPoints(step);
+    const next = random.get(0, leftPoints.length - 1, true);
+    return leftPoints[next];
+  }
 
-  mstep = [];
-  for (let i = 0; i < NOA; i++) {
-    mstep.push([ 0, 0, 0, 0 ]);
+  _nextMaxStep(current, step) {
+    const leftPoints = this._getLeftPoints(step);
+    const leftPointPheromons = this._getLeftPointPheromons(current, step);
+    let max = 0;
+
+    for (let i = 1; i < leftPointPheromons.length; i++) {
+      if (leftPointPheromons[i] > leftPointPheromons[max])
+        max = i;
+    }
+    return leftPoints[max];
+  }
+
+  _getLeftPointPheromons(current, step) {
+    const leftPoints = this._getLeftPoints(step);
+    const leftPointPheromons = [];
+
+    for (let i = 0; i < leftPoints.length; i++) {
+      leftPointPheromons.push(this._pheromone[current][leftPoints[i]]);
+    }
+    return leftPointPheromons;
+  }
+
+  _getLeftPoints(step) {
+    let leftPoints = [];
+    for (let i = 1; i <= this._step; i++) {
+      if (step.indexOf(i) == -1)
+        leftPoints.push(i);
+    }
+    return leftPoints;
   }
 }
+
+module.exports = AntColony;
