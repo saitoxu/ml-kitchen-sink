@@ -2,6 +2,7 @@ Ant Colony
 ---
 Ant colony optimization is a probabilistic solution
 to solve like the shortest path problem,
+
 imitates the ant behavior in finding a route to food.
 
 Please see here for details of the algorithm.
@@ -45,10 +46,10 @@ console.log(ac.result());
 ```
 
 |Variable|Meaning|
-|---|---|
-|NOA|Number of ants|
-|LIMIT|Maximum number of attempts|
-|Q|Influence of pheromone|
-|RHO|Evaporation rate of pheromone|
-|EPSILON|The probability of not considering the pheromone concentration when an ant chooses the next node (epsilon-greedy method)|
-|distance|Two-dimensional array of graph|
+|:---|:---|
+|`NOA`|Number of ants|
+|`LIMIT`|Maximum number of attempts|
+|`Q`|Influence of pheromone|
+|`RHO`|Evaporation rate of pheromone|
+|`EPSILON`|The probability of not considering the pheromone concentration when an ant chooses the next node (epsilon-greedy method)|
+|`distance`|Two-dimensional array of graph|
