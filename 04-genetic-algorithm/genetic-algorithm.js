@@ -1,7 +1,7 @@
 const random = require('../lib/random');
 
 class GeneticAlgorithm {
-  constructor(data, last, rate, limit, poolSize) {
+  constructor(data, limit, poolSize = 50, last = 100, rate = 0.01) {
     this._parcels = this._initParcels(data);
     this._n = this._parcels.length;
     this._last = last;

@@ -1,21 +1,20 @@
 Genetic Algorithm
 ---
-遺伝的アルゴリズムはデータ（解の候補）を遺伝子で表現した「個体」を複数用意し、
-適応度の高い個体を優先的に選択して交叉（組み換え）・突然変異などの操作を繰り返しながら解を探索するアルゴリズムです。
+Genetic algorithm is an algorithm which prepares a plurality of "individuals" which represent data (candidate solutions) by genes, and selects individuals with high fitness preferentially and searches for solutions while repeating operations such as crossover (recombination) and mutation.
 
 [Genetic Algorithm](https://en.wikipedia.org/wiki/Genetic_algorithm)
 
 ## Description
-このプログラムではナップサック問題を解くことができます。
+This program can solve a knapsack problem.
 
 ### What is Knapsack problem?
-ナップサック問題は、価値と重さが決まっている複数の品物を容量が一定のナップサックに詰め込むとき、ナップサックに詰め込める品物の価値の和の最大値は何であるか？という問題です。
+The knapsack problem is a problem to find the maximum sum of the value of items that can be packed into knapsack when packing multiple items of which value and weight are fixed in a certain knapsack.
 
 [Knapsack Problem](https://en.wikipedia.org/wiki/Knapsack_problem)
 
 ### Data Input
-品物のデータは以下の形式で入力します。
-1行ごとに1つの品物を入力し、最初に重さ、次に価値を入力します。
+The data of items are entered in the following format.
+Enter one item per line, first enter the weight, then the value.
 
 ```bash
 $ cat data.txt
@@ -32,23 +31,23 @@ $ cat data.txt
 ```
 
 ## Usage
-使い方は品物のデータといくつかのパラメータを渡すだけです。
+The usage is simply to pass the item data and some parameters.
 
-1. 品物のデータといくつかのパラメータを引数に`GeneticAlgorithm`をインスタンス化します。
-2. `fit()`でナップサック問題を解きます。
-3. `result()`で求めた最適解の情報を表示します。
+1. Initialize `GeneticAlgorithm` with data of items and some parameters.
+2. Call `fit` to solve a knapsack problem.
+3. Call `result` to show related information of the solution.
 
 ### Parameter
-|Parameter|Meaning|Mandatory|
-|:---|:---|:---|
-|data|ナップサックに入れる候補となる品物の情報。データの形式は上述の通り。|true|
-|LIMIT|ナップサックに入る容量の最大値|true|
-|POOLSIZE|遺伝子の数|true|
-|LAST|遺伝操作を行う回数|true|
-|RATE|突然変異が発生する確率|true|
+|Parameter|Meaning|Mandatory|Default|
+|:---|:---|:---|---:|
+|data|Information on candidate goods to be put in the knapsack. The format of the data is as described above.|true|-|
+|LIMIT|The maximum weights which can be packed in knapsack|true|-|
+|POOLSIZE|The number of genes|false|50|
+|LAST|The count of genetic manipulation|false|100|
+|RATE|Probability of mutation|false|0.01|
 
 ### Example
-具体例は以下になります。
+A concrete example is as below.
 
 ```js
 const fs = require('fs');
@@ -58,13 +57,13 @@ const POOLSIZE = 50;
 const LAST = 100;
 const RATE = 0.05;
 const data = fs.readFileSync('data.txt').toString();
-const ga = new GenericAlgorithm(data, LAST, RATE, LIMIT, POOLSIZE);
+const ga = new GeneticAlgorithm(data, LIMIT, POOLSIZE, LAST, RATE);
 
 ga.fit();
 console.log(ga.result());
 ```
 
-実行すると、下記のように解の情報が表示されます。
+When executed, information of the solution is shown as below.
 
 ```bash
 $ node example.js
