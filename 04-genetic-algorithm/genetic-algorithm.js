@@ -1,6 +1,6 @@
 const random = require('../lib/random');
 
-class GenericAlgorithm {
+class GeneticAlgorithm {
   constructor(data, last, rate, limit, poolSize) {
     this._parcels = this._initParcels(data);
     this._n = this._parcels.length;
@@ -181,4 +181,4 @@ class GenericAlgorithm {
   }
 }
 
-module.exports = GenericAlgorithm;
+module.exports = GeneticAlgorithm;
