@@ -1,41 +1,39 @@
-/**
- * Neuron
- *
- * And operator
- */
-'use strict';
-
-const fs = require('fs');
-const Neuron = require('../lib/neuron.js');
-
-fs.readFile('data.txt', (err, data) => {
-  const input = initInput(data);
-  const w = [ 1, 1 ];
-  const v = 1.5;
-  const neuron = new Neuron(w, v, f);
-
-  for (let i = 0; i < input.length; i++) {
-    console.log(input[i], neuron.forward(input[i]));
+class Neuron {
+  constructor(w, v, f) {
+    this.w = w;
+    this.v = v;
+    this.f = f;
+    this.o = null;
   }
 
-  /**
-   * Transfer function
-   *
-   * @param  {Number} u
-   * @return {Number}
-   */
-  function f(u) {
-    return u >= 0 ? 1 : 0;
-  }
-
-  function initInput(data) {
-    const lines = data.toString().split('\n');
-    let input = [];
-
-    for (let i = 0; i < lines.length - 1; i++) {
-      const inputs = lines[i].split(' ');
-      input.push([ parseInt(inputs[0]), parseInt(inputs[1]) ]);
+  forward(input) {
+    let sum = 0;
+    for (let i = 0; i < input.length; i++) {
+      sum += input[i] * this.w[i];
     }
-    return input;
+    this.o = this.f(sum - this.v);
+    return this.o;
   }
-});
+
+  getO() {
+    return this.o;
+  }
+
+  getW(i) {
+    return this.w[i];
+  }
+
+  getV() {
+    return this.v;
+  }
+
+  setW(i, value) {
+    this.w[i] = value;
+  }
+
+  setV(value) {
+    this.v = value;
+  }
+}
+
+module.exports = Neuron;
