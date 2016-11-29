@@ -1,18 +1,20 @@
 Neuron
 ---
-ニューロンはニューラルネットワークの構成要素です。
+Neurons are components of neural networks that mimic neurons of the brain.
 
-脳の神経細胞を模倣して、入力を受けて、
-入力の総量が閾値を超えたら反応して1、超えなければ0を出力します。
 
-詳しくは下のリンクを見てください。
+It receives one or more inputs and generates output (synapse) from the sum of them.
+
+Normally, the sum of each node is weighted and passed to a nonlinear function called a transfer function.
+
+Please see the following link for more detail.
 
 [Neural Network](https://en.wikipedia.org/wiki/Artificial_neural_network)
 
 ## Description
-ここでは論理積を作ってみます。
+Let's make a logical AND here.
 
-論理積は以下の入力と出力の組み合わせになります。
+The logical AND is a combination of the following inputs and outputs.
 
 |Input1|Input2|Output|
 |:---|:---|:---|
