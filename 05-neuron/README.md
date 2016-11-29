@@ -2,7 +2,6 @@ Neuron
 ---
 Neurons are components of neural networks that mimic neurons of the brain.
 
-
 It receives one or more inputs and generates output (synapse) from the sum of them.
 
 Normally, the sum of each node is weighted and passed to a nonlinear function called a transfer function.
