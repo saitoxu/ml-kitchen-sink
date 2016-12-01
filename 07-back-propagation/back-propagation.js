@@ -1,8 +1,6 @@
-'use strict';
-
-let fs = require('fs'),
-    random = require('../lib/random.js'),
-    Neuron = require('../lib/neuron.js');
+const fs = require('fs');
+const random = require('../lib/random');
+const Neuron = require('../05-neuron/neuron');
 
 const ALPHA =   10;
 const LIMIT = 0.01;
