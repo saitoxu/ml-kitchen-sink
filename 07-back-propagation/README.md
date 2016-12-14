@@ -1,14 +1,14 @@
-# Back Propagation
-
+Back Propagation
+---
 It is a supervised learning algorithm for learning a neural network.
 
-# Usage
+## Usage
 
 Prepare for input data.
 
-The first three of each row are input data, The last one is the correct output data.
+The first three of each row are input data, the last one is the correct output data.
 
-## Input Data
+### Input Data
 ```bash
 $ cat data.txt
 1 1 1 1
@@ -21,7 +21,7 @@ $ cat data.txt
 0 0 0 0
 ```
 
-## Example Program
+### Example
 ```js
 const fs = require('fs');
 const BackPropagation = require('./back-propagation');
@@ -58,7 +58,7 @@ function initInput(data) {
 }
 ```
 
-## Result
+### Result
 ```bash
 $ node example.js
 [ 1, 1, 1, 1 ] 0.9975867553861153
