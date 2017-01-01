@@ -1,4 +1,4 @@
-class ConvolutionLayer {
+class ConvolutionalLayer {
   constructor(e, filter) {
     this.e = e;
     this.filter = filter;
@@ -30,4 +30,4 @@ class ConvolutionLayer {
   }
 }
 
-module.exports = ConvolutionLayer;
+module.exports = ConvolutionalLayer;
