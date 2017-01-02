@@ -1,11 +1,5 @@
-'use strict';
+const random = require('../lib/random');
 
-let random = require('../lib/random.js');
-
-/**
- * fully connected layer
- * only untied weight is supported
- */
 class FCLayer {
   constructor(f, hiddenNo, alpha, inputNo, outputNo) {
     this.f = f;
