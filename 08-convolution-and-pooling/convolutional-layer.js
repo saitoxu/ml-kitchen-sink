@@ -1,21 +1,29 @@
+const random = require('../lib/random');
+
 class ConvolutionalLayer {
-  constructor(e, filter) {
-    this.e = e;
-    this.filter = filter;
+  constructor(filterSize) {
+    this.filter = [];
+    for (let i = 0; i < filterSize; i++) {
+      let ary = [];
+      this.filter.push(ary);
+      for (let j = 0; j < filterSize; j++) {
+        ary.push(random.get(-1, 1, false));
+      }
+    }
   }
 
-  calc() {
+  conv(image) {
     let convOut = [],
         row,
         filterSize = this.filter.length;
 
-    for (let i = 0; i < this.e.length - (filterSize - 1); i++) {
+    for (let i = 0; i < image.length - (filterSize - 1); i++) {
       convOut.push(row = []);
-      for (let j = 0; j < this.e[i].length - (filterSize - 1); j++) {
-        row.push(this._sum(this.e, this.filter, i, j));
+      for (let j = 0; j < image.length - (filterSize - 1); j++) {
+        row.push(this._sum(image, this.filter, i, j));
       }
     }
-    this.layer = convOut;
+    return convOut;
   }
 
   _sum(e, filter, i, j) {

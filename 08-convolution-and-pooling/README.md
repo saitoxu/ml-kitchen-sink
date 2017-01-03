@@ -31,23 +31,21 @@ $ cat sample.dat
 ```js
 const fs = require('fs');
 const POOLSIZE = 3;
+const FILTERSIZE = 3;
 const data = fs.readFileSync('sample.dat');
 const ConvolutionalLayer = require('./convolutional-layer');
 const PoolingLayer = require('./pooling-layer');
-const e = inputData(data.toString());
-const filter = [[ 0, 1, 0 ],
-                [ 0, 1, 0 ],
-                [ 0, 1, 0 ]];
+const image = inputData(data.toString());
+const cl = new ConvolutionalLayer(FILTERSIZE);
+cl.filter = [[ 0, 1, 0 ],
+             [ 0, 1, 0 ],
+             [ 0, 1, 0 ]];
+const pl = new PoolingLayer(POOLSIZE);
+const convImage = cl.conv(image);
 
-const conv = new ConvolutionalLayer(e, filter);
-const pool = new PoolingLayer(POOLSIZE, conv);
-
-conv.calc();
-pool.calc();
-
-for (row of pool.layer) {
+for (let row of pl.pool(convImage)) {
   console.log(row);
-}
+};
 
 function inputData(d) {
   let e = [],
